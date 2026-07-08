@@ -19,8 +19,8 @@ class ProductCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Card(
-        elevation: 3,
-        shadowColor: Colors.black12,
+        elevation: 8,
+        shadowColor: Colors.black26,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -33,18 +33,27 @@ class ProductCard extends StatelessWidget {
                 top: Radius.circular(16),
               ),
               child: SizedBox(
-                height: 150,
+                height: 160,
                 width: double.infinity,
                 child: CachedNetworkImage(
                   imageUrl: product.thumbnail,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => const Center(
-                    child: CircularProgressIndicator(),
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey.shade200,
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    ),
                   ),
-                  errorWidget: (context, url, error) => const Center(
-                    child: Icon(
-                      Icons.broken_image,
-                      size: 40,
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey.shade200,
+                    child: const Center(
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                 ),
@@ -63,17 +72,19 @@ class ProductCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
+                        height: 1.3,
                       ),
                     ),
 
                     const SizedBox(height: 8),
 
                     Text(
-                      product.category,
+                        product.category.toUpperCase(),
                       style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 13,
+                        color: Colors.grey.shade700,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
 
@@ -82,9 +93,9 @@ class ProductCard extends StatelessWidget {
                     Row(
                       children: [
                         const Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                          size: 18,
+                          Icons.star_rounded,
+                          color: Colors.orange,
+                          size: 20,
                         ),
 
                         const SizedBox(width: 4),
@@ -101,7 +112,7 @@ class ProductCard extends StatelessWidget {
                         Text(
                           "\$${product.price.toStringAsFixed(2)}",
                           style: const TextStyle(
-                            color: Colors.indigo,
+                            color: Colors.green,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),

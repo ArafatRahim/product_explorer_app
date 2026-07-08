@@ -7,8 +7,13 @@ import '../data/models/product_model.dart';
 class ApiService {
   static const String baseUrl = 'https://dummyjson.com/products';
 
-  Future<List<Product>> fetchProducts() async {
-    final response = await http.get(Uri.parse(baseUrl));
+  Future<List<Product>> fetchProducts({
+    int limit = 20,
+    int skip = 0,
+  }) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl?limit=$limit&skip=$skip'),
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

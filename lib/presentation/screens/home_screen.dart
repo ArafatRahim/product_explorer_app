@@ -38,9 +38,28 @@ class _HomeScreenState extends State<HomeScreen> {
         : 2;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FB),
+
       appBar: AppBar(
-        title: const Text("Product Explorer"),
+        elevation: 0,
         centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.indigo,
+                Colors.deepPurple,
+              ],
+            ),
+          ),
+        ),
+        title: const Text(
+          "Product Explorer",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
 
       body: RefreshIndicator(
@@ -57,7 +76,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 15),
-                    Text("Loading Products..."),
+                    Text(
+                      "Loading Products...",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 16,
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -76,10 +101,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Explore Products",
+                    "Discover Amazing Products",
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    "${provider.filteredProducts.length} Products Available",
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: 15,
                     ),
                   ),
 
@@ -95,22 +130,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 18),
 
                   // Search Box
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: "Search products...",
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: Colors.grey.shade100,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    onChanged: provider.searchProducts,
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: "Search by title or category...",
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: const Icon(Icons.tune),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onChanged: provider.searchProducts,
+                    ),
                   ),
 
                   const SizedBox(height: 18),
@@ -123,54 +166,92 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              Icons.search_off,
-                              size: 70,
+                              Icons.inventory_2_outlined,
+                              size: 90,
                               color: Colors.grey,
                             ),
-                            SizedBox(height: 12),
+
+                            SizedBox(height: 15),
+
                             Text(
                               "No Products Found",
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+
+                            SizedBox(height: 6),
+
+                            Text(
+                              "Try another keyword.",
+                              style: TextStyle(
+                                color: Colors.grey,
+                              ),
+                            ),
+                            SizedBox(height: 12),
                           ],
                         ),
                       ),
                     )
                   else
                     Expanded(
-                      child: GridView.builder(
-                        itemCount: provider.filteredProducts.length,
-                        gridDelegate:
-                        SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 0.68,
-                        ),
-                        itemBuilder: (context, index) {
-                          final product = provider.filteredProducts[index];
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: GridView.builder(
+                              itemCount: provider.filteredProducts.length,
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                                childAspectRatio: 0.68,
+                              ),
+                              itemBuilder: (context, index) {
+                                final product = provider.filteredProducts[index];
 
-                          return ProductCard(
-                            product: product,
-                            onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailsScreen(
-                                    product: product,
+                                return ProductCard(
+                                  product: product,
+                                  onTap: () async {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ProductDetailsScreen(
+                                          product: product,
+                                        ),
+                                      ),
+                                    );
+
+                                    if (context.mounted) {
+                                      await provider.fetchProducts();
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+
+                          if (provider.hasMore)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: provider.loadMore,
+                                  icon: const Icon(Icons.expand_more),
+                                  label: const Text("Load More"),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.indigo,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
                                 ),
-                              );
-
-                              if (context.mounted) {
-                                await provider.fetchProducts();
-                              }
-                            },
-                          );
-                        },
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                 ],
@@ -180,9 +261,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      floatingActionButton: FloatingActionButton(
-        tooltip: "Add Product",
-        child: const Icon(Icons.add),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text("Add"),
         onPressed: () async {
           final result = await Navigator.push(
             context,
